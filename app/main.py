@@ -36,9 +36,13 @@ from app.services.gamification import create_default_achievements, update_streak
 
 
 # Настраиваем пути для статики и шаблонов
+# os.path.abspath(__file__) = C:\...\Python-master\app\main.py
+# dirname = C:\...\Python-master\app
+# dirname again = C:\...\Python-master (проект)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TEMPLATES_DIR = os.path.join(BASE_DIR, "app", "templates")
-STATIC_DIR = os.path.join(BASE_DIR, "app", "static")
+APP_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATES_DIR = os.path.join(APP_DIR, "templates")
+STATIC_DIR = os.path.join(APP_DIR, "static")
 
 # Создаём директории если их нет
 os.makedirs(TEMPLATES_DIR, exist_ok=True)

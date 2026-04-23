@@ -1,0 +1,17 @@
+# docker-compose.yml для локальной разработки
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8001:8000"
+    volumes:
+      # Монтируем директорию data для сохранения базы данных
+      - ./data:/data
+    environment:
+      # Используем абсолютный путь внутри контейнера
+      - DATABASE_URL=sqlite+aiosqlite:////data/python_master.db
+      - DEBUG=false
+      - SECRET_KEY=change-me-in-production-use-strong-random-key
+    restart: unless-stopped
