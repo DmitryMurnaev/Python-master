@@ -25,14 +25,21 @@ from sqlalchemy.orm import DeclarativeBase
 from app.core.config import settings
 
 
+# Преобразуем postgresql:// в postgresql+asyncpg:// для асинхронного движка
+database_url = settings.DATABASE_URL
+if database_url.startswith("postgresql://"):
+    database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+elif database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql+asyncpg://", 1)
+
 # Создаём асинхронный движок базы данных
 # check_same_thread=False нужен для SQLite при использовании в многопоточном контексте
 connect_args = {}
-if "sqlite" in settings.DATABASE_URL:
+if "sqlite" in database_url:
     connect_args["check_same_thread"] = False
 
 engine = create_async_engine(
-    settings.DATABASE_URL,
+    database_url,
     echo=settings.DEBUG,  # Логируем SQL запросы в режиме отладки
     connect_args=connect_args
 )
