@@ -59,6 +59,8 @@ async def lifespan(app: FastAPI):
     Здесь инициализируем базу данных и создаём начальные данные.
     """
     # Startup
+    import jinja2
+    print(f"Jinja2 version: {jinja2.__version__}")
     print("Инициализация базы данных...")
     await init_db()
 
@@ -100,15 +102,18 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 # Настраиваем Jinja2 шаблонизатор
-templates = Jinja2Templates(directory=TEMPLATES_DIR)
+from jinja2 import Environment, FileSystemLoader
+
+jinja_env = Environment(loader=FileSystemLoader(TEMPLATES_DIR), auto_reload=True)
 
 # Добавляем фильтр для Jinja для красивого форматирования
 def format_xp(xp: int) -> str:
     """Форматирует XP с разделением тысяч."""
     return f"{xp:,}".replace(",", " ")
 
+jinja_env.filters["format_xp"] = format_xp
 
-templates.env.filters["format_xp"] = format_xp
+templates = Jinja2Templates(env=jinja_env, directory=TEMPLATES_DIR)
 
 
 # Подключаем API роутеры
