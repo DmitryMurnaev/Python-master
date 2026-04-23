@@ -122,11 +122,18 @@ app.include_router(flashcards_router)
 
 
 # Главная страница
+@app.get("/favicon.ico")
+async def favicon():
+    """Заглушка для favicon."""
+    from fastapi.responses import Response
+    return Response(status_code=204)
+
+
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     """Главная страница с информацией о курсе."""
     token = request.cookies.get("access_token")
-    user = None
+    user_data = None
 
     if token:
         from app.core.security import decode_access_token
@@ -135,10 +142,18 @@ async def root(request: Request):
             async with AsyncSessionLocal() as db:
                 result = await db.execute(select(User).where(User.id == int(user_id)))
                 user = result.scalar_one_or_none()
+                if user:
+                    user_data = {
+                        "id": user.id,
+                        "username": user.username,
+                        "email": user.email,
+                        "xp": user.xp,
+                        "level": user.level,
+                    }
 
     return templates.TemplateResponse("index.html", {
         "request": request,
-        "user": user,
+        "user": user_data,
     })
 
 
