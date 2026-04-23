@@ -27,3 +27,4 @@ python-dateutil>=2.8.2
 
 # Работа с кодом (подсветка синтаксиса в редакторе)
 pygments>=2.17.0
+psycopg2-binary
