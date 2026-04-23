@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Master - Интерактивная платформа для изучения Python</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Кастомные стили для кодовых блоков */
+        pre code {
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+        }
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 8px;
+            padding: 16px;
+            overflow-x: auto;
+        }
+        /* Анимация появления */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        /* Прогресс бар */
+        .progress-bar {
+            background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 border-b border-gray-700">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <a href="/" class="flex items-center space-x-2">
+                    <span class="text-2xl">🐍</span>
+                    <span class="font-bold text-xl">Python Master</span>
+                </a>
+                <div class="flex items-center space-x-4">
+                    {% if user %}
+                        <a href="/dashboard" class="hover:text-green-400 transition">Дашборд</a>
+                        <a href="/blocks" class="hover:text-green-400 transition">Блоки</a>
+                        <span class="text-gray-400">|</span>
+                        <span class="text-green-400">XP: {{ user.xp }}</span>
+                        <span class="text-yellow-400">Ур. {{ user.level }}</span>
+                        <a href="/api/auth/logout" class="text-gray-400 hover:text-white">Выход</a>
+                    {% else %}
+                        <a href="/auth/login" class="text-gray-400 hover:text-white">Вход</a>
+                        <a href="/auth/register" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition">Регистрация</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="py-20">
+        <div class="max-w-4xl mx-auto px-4 text-center animate-fade-in">
+            <h1 class="text-5xl font-bold mb-6">
+                <span class="text-green-400">Изучайте Python</span><br>
+                от нуля до профессионала
+            </h1>
+            <p class="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
+                Интерактивная платформа с практическими задачами, автоматической проверкой кода,
+                системой прогресса и геймификацией для мотивации.
+            </p>
+
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                {% if not user %}
+                    <a href="/auth/register" class="bg-green-600 hover:bg-green-700 px-8 py-4 rounded-xl text-lg font-semibold transition transform hover:scale-105">
+                        Начать обучение бесплатно
+                    </a>
+                {% else %}
+                    <a href="/dashboard" class="bg-green-600 hover:bg-green-700 px-8 py-4 rounded-xl text-lg font-semibold transition transform hover:scale-105">
+                        Продолжить обучение
+                    </a>
+                {% endif %}
+                <a href="/blocks" class="bg-gray-700 hover:bg-gray-600 px-8 py-4 rounded-xl text-lg font-semibold transition">
+                    Смотреть программу курса
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="py-16 bg-gray-800">
+        <div class="max-w-6xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Почему Python Master?</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Интерактивный интерпретатор -->
+                <div class="bg-gray-700 rounded-xl p-6">
+                    <div class="text-4xl mb-4">💻</div>
+                    <h3 class="text-xl font-semibold mb-2">Интерактивный интерпретатор</h3>
+                    <p class="text-gray-400">Пишите и запускайте код прямо в браузере. Безопасно, с ограничением времени выполнения.</p>
+                </div>
+
+                <!-- Практические задачи -->
+                <div class="bg-gray-700 rounded-xl p-6">
+                    <div class="text-4xl mb-4">🎯</div>
+                    <h3 class="text-xl font-semibold mb-2">Практические задачи</h3>
+                    <p class="text-gray-400">Автоматическая проверка решений. Тесты видны после решения для самообучения.</p>
+                </div>
+
+                <!-- Система прогресса -->
+                <div class="bg-gray-700 rounded-xl p-6">
+                    <div class="text-4xl mb-4">📊</div>
+                    <h3 class="text-xl font-semibold mb-2">Система прогресса</h3>
+                    <p class="text-gray-400">XP, уровни, достижения, streak. Визуализация прогресса и мотивация не бросить.</p>
+                </div>
+
+                <!-- Карточки -->
+                <div class="bg-gray-700 rounded-xl p-6">
+                    <div class="text-4xl mb-4">🃏</div>
+                    <h3 class="text-xl font-semibold mb-2">Карточки для повторения</h3>
+                    <p class="text-gray-400">Алгоритм интервального повторения (SM-2) для эффективного запоминания теории.</p>
+                </div>
+
+                <!-- Структура -->
+                <div class="bg-gray-700 rounded-xl p-6">
+                    <div class="text-4xl mb-4">📚</div>
+                    <h3 class="text-xl font-semibold mb-2">8 блоков обучения</h3>
+                    <p class="text-gray-400">От основ до продвинутых тем: ООП, декораторы, базы данных, FastAPI.</p>
+                </div>
+
+                <!-- Проекты -->
+                <div class="bg-gray-700 rounded-xl p-6">
+                    <div class="text-4xl mb-4">🚀</div>
+                    <h3 class="text-xl font-semibold mb-2">Проекты в каждом блоке</h3>
+                    <p class="text-gray-400">Практика на реальных проектах: калькулятор, игра, анализатор текста, REST API.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Roadmap preview -->
+    <section class="py-16">
+        <div class="max-w-6xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Программа обучения</h2>
+            <div class="grid md:grid-cols-4 gap-4">
+                <div class="bg-gray-800 rounded-lg p-4 border-l-4 border-green-500">
+                    <span class="text-2xl">🐍</span>
+                    <h3 class="font-semibold mt-2">Блок 1</h3>
+                    <p class="text-sm text-gray-400">Основы Python</p>
+                </div>
+                <div class="bg-gray-800 rounded-lg p-4 border-l-4 border-blue-500">
+                    <span class="text-2xl">⚙️</span>
+                    <h3 class="font-semibold mt-2">Блок 2</h3>
+                    <p class="text-sm text-gray-400">Функции и модули</p>
+                </div>
+                <div class="bg-gray-800 rounded-lg p-4 border-l-4 border-purple-500">
+                    <span class="text-2xl">📊</span>
+                    <h3 class="font-semibold mt-2">Блок 3</h3>
+                    <p class="text-sm text-gray-400">Коллекции</p>
+                </div>
+                <div class="bg-gray-800 rounded-lg p-4 border-l-4 border-orange-500">
+                    <span class="text-2xl">📁</span>
+                    <h3 class="font-semibold mt-2">Блок 4</h3>
+                    <p class="text-sm text-gray-400">Файлы и исключения</p>
+                </div>
+                <div class="bg-gray-800 rounded-lg p-4 border-l-4 border-red-500">
+                    <span class="text-2xl">🏗️</span>
+                    <h3 class="font-semibold mt-2">Блок 5</h3>
+                    <p class="text-sm text-gray-400">ООП</p>
+                </div>
+                <div class="bg-gray-800 rounded-lg p-4 border-l-4 border-yellow-500">
+                    <span class="text-2xl">🚀</span>
+                    <h3 class="font-semibold mt-2">Блок 6</h3>
+                    <p class="text-sm text-gray-400">Продвинутые темы</p>
+                </div>
+                <div class="bg-gray-800 rounded-lg p-4 border-l-4 border-cyan-500">
+                    <span class="text-2xl">🗄️</span>
+                    <h3 class="font-semibold mt-2">Блок 7</h3>
+                    <p class="text-sm text-gray-400">Базы данных</p>
+                </div>
+                <div class="bg-gray-800 rounded-lg p-4 border-l-4 border-pink-500">
+                    <span class="text-2xl">⚡</span>
+                    <h3 class="font-semibold mt-2">Блок 8</h3>
+                    <p class="text-sm text-gray-400">Введение в FastAPI</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 py-8 mt-16">
+        <div class="max-w-4xl mx-auto px-4 text-center text-gray-400">
+            <p>Python Master © 2024-2026</p>
+            <p class="mt-2 text-sm">Создано для изучения Python с нуля</p>
+        </div>
+    </footer>
+</body>
+</html>

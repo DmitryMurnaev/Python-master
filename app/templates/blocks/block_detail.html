@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ block.title }} - Python Master</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .progress-bar { background: linear-gradient(90deg, #10b981 0%, #34d399 100%); }
+        .lesson-card { transition: all 0.2s; }
+        .lesson-card:hover { transform: translateX(4px); }
+        .locked { opacity: 0.5; cursor: not-allowed; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 border-b border-gray-700">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-2xl">🐍</a>
+                    <a href="/blocks" class="text-gray-400 hover:text-white">← Блоки</a>
+                    <span class="text-gray-600">|</span>
+                    <span>{{ block.icon }} {{ block.title }}</span>
+                </div>
+                {% if user %}
+                <div class="flex items-center space-x-4">
+                    <span class="text-green-400">XP: {{ user.xp }}</span>
+                    <span class="text-yellow-400">Ур. {{ user.level }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 py-8">
+        <!-- Block Header -->
+        <div class="mb-8">
+            <div class="flex items-center mb-4">
+                <span class="text-4xl mr-4">{{ block.icon }}</span>
+                <div>
+                    <h1 class="text-3xl font-bold">{{ block.title }}</h1>
+                    <p class="text-gray-400 mt-2">{{ block.description }}</p>
+                </div>
+            </div>
+            <div class="flex items-center justify-between text-sm text-gray-400 mb-2">
+                <span>{{ block.completed_lessons }}/{{ block.lessons_count }} уроков пройдено</span>
+                <span>{{ block.progress_percent }}%</span>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-3">
+                <div class="progress-bar h-3 rounded-full" style="width: {{ block.progress_percent }}%"></div>
+            </div>
+        </div>
+
+        <!-- Lessons List -->
+        <h2 class="text-xl font-bold mb-4">Уроки</h2>
+        <div class="space-y-4">
+            {% for lesson in block.lessons %}
+            <div class="lesson-card {% if lesson.is_locked %}locked{% endif %}">
+                {% if lesson.is_locked %}
+                <div class="bg-gray-800 rounded-xl p-6 opacity-50">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <span class="text-2xl mr-4">🔒</span>
+                            <div>
+                                <h3 class="font-semibold text-lg">{{ lesson.title }}</h3>
+                                <p class="text-gray-400 text-sm">{{ lesson.description or 'Урок заблокирован' }}</p>
+                            </div>
+                        </div>
+                        <span class="text-gray-500">Пройдите предыдущий урок</span>
+                    </div>
+                </div>
+                {% elif lesson.is_completed %}
+                <a href="/api/blocks/lesson/{{ lesson.id }}" class="block">
+                    <div class="bg-gray-800 rounded-xl p-6 border-l-4 border-green-500">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="text-2xl mr-4">✓</span>
+                                <div>
+                                    <h3 class="font-semibold text-lg text-green-400">{{ lesson.title }}</h3>
+                                    <p class="text-gray-400 text-sm">{{ lesson.description }}</p>
+                                    {% if lesson.quizzes_count > 0 or lesson.tasks_count > 0 %}
+                                    <div class="flex items-center mt-2 text-sm">
+                                        {% if lesson.quizzes_count > 0 %}
+                                        <span class="text-blue-400 mr-4">📝 {{ lesson.quizzes_count }} квиз</span>
+                                        {% endif %}
+                                        {% if lesson.tasks_count > 0 %}
+                                        <span class="text-orange-400">🎯 {{ lesson.tasks_count }} задач</span>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <span class="text-green-400">✓ Завершён</span>
+                        </div>
+                    </div>
+                </a>
+                {% else %}
+                <a href="/api/blocks/lesson/{{ lesson.id }}" class="block">
+                    <div class="bg-gray-800 rounded-xl p-6 hover:bg-gray-700 transition">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="text-2xl mr-4">📖</span>
+                                <div>
+                                    <h3 class="font-semibold text-lg">{{ lesson.title }}</h3>
+                                    <p class="text-gray-400 text-sm">{{ lesson.description }}</p>
+                                    {% if lesson.quizzes_count > 0 or lesson.tasks_count > 0 %}
+                                    <div class="flex items-center mt-2 text-sm">
+                                        {% if lesson.quizzes_count > 0 %}
+                                        <span class="text-blue-400 mr-4">📝 {{ lesson.quizzes_count }} квиз</span>
+                                        {% endif %}
+                                        {% if lesson.tasks_count > 0 %}
+                                        <span class="text-orange-400">🎯 {{ lesson.tasks_count }} задач</span>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <span class="text-green-400">Начать →</span>
+                        </div>
+                    </div>
+                </a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ lesson.title }} - Python Master</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .code-block { background: #1e1e1e; border-radius: 8px; }
+        pre code { font-family: 'Fira Code', 'Consolas', monospace; }
+        .tab-btn.active { border-bottom: 2px solid #10b981; color: #10b981; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 border-b border-gray-700">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-2xl">🐍</a>
+                    <a href="/blocks" class="text-gray-400 hover:text-white">← Блоки</a>
+                    <span class="text-gray-600">|</span>
+                    <span>{{ lesson.block.title if lesson.block else 'Урок' }}</span>
+                    <span class="text-gray-600">|</span>
+                    <span>{{ lesson.title }}</span>
+                </div>
+                {% if user %}
+                <div class="flex items-center space-x-4">
+                    <span class="text-green-400">XP: {{ user.xp }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-2xl font-bold">{{ lesson.title }}</h1>
+            {% if is_completed %}
+            <span class="bg-green-600 px-4 py-2 rounded-lg text-sm">✓ Завершён</span>
+            {% endif %}
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex border-b border-gray-700 mb-6">
+            <button class="tab-btn active px-6 py-3 text-gray-400 hover:text-white" onclick="showTab('theory')">📖 Теория</button>
+            <button class="tab-btn px-6 py-3 text-gray-400 hover:text-white" onclick="showTab('quiz')">📝 Квиз</button>
+            <button class="tab-btn px-6 py-3 text-gray-400 hover:text-white" onclick="showTab('tasks')">🎯 Задачи</button>
+            <button class="tab-btn px-6 py-3 text-gray-400 hover:text-white" onclick="showTab('interpreter')">💻 Интерпретатор</button>
+        </div>
+
+        <!-- Theory Tab -->
+        <div id="theory-tab" class="tab-content">
+            <div class="prose prose-invert max-w-none">
+                {% if lesson.content %}
+                <div class="bg-gray-800 rounded-xl p-6 mb-6">
+                    {{ lesson.content|safe }}
+                </div>
+                {% else %}
+                <div class="bg-gray-800 rounded-xl p-6 text-center text-gray-400">
+                    Теоретический материал скоро будет добавлен
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quiz Tab -->
+        <div id="quiz-tab" class="tab-content hidden">
+            {% if quizzes and quizzes|length > 0 %}
+            {% for quiz in quizzes %}
+            <div class="bg-gray-800 rounded-xl p-6 mb-6">
+                <h2 class="text-xl font-bold mb-4">{{ quiz.title }}</h2>
+                <div id="quiz-{{ quiz.id }}" class="quiz-container">
+                    <div class="questions-list">
+                        {% for q in quiz.questions %}
+                        <div class="mb-6 question-item" data-question="{{ loop.index0 }}">
+                            <p class="font-medium mb-3">{{ loop.index }}. {{ q.question }}</p>
+                            <div class="space-y-2">
+                                {% for option in q.options %}
+                                <label class="flex items-center p-3 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600">
+                                    <input type="radio" name="q{{ loop.parent.loop.index0 }}" value="{{ loop.index0 }}" class="mr-3">
+                                    <span>{{ option }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button onclick="submitQuiz({{ quiz.id }})" class="mt-6 bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg font-semibold">
+                        Отправить ответы
+                    </button>
+                </div>
+                <div id="quiz-result-{{ quiz.id }}" class="hidden"></div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="bg-gray-800 rounded-xl p-6 text-center text-gray-400">
+                К этому уроку пока нет квиза
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Tasks Tab -->
+        <div id="tasks-tab" class="tab-content hidden">
+            {% if tasks and tasks|length > 0 %}
+            <div class="space-y-6">
+                {% for task in tasks %}
+                <div class="bg-gray-800 rounded-xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold">{{ task.title }}</h3>
+                        <span class="text-green-400">+{{ task.xp_reward }} XP</span>
+                    </div>
+                    <p class="text-gray-300 mb-4">{{ task.description }}</p>
+
+                    {% if task.expected_output %}
+                    <div class="bg-gray-700 rounded-lg p-3 mb-4">
+                        <span class="text-gray-400 text-sm">Ожидаемый вывод:</span>
+                        <pre class="text-green-400 mt-1">{{ task.expected_output }}</pre>
+                    </div>
+                    {% endif %}
+
+                    {% if task.hints and task.hints|length > 0 %}
+                    <details class="mb-4">
+                        <summary class="text-blue-400 cursor-pointer">💡 Показать подсказки</summary>
+                        <ul class="mt-2 text-gray-400">
+                            {% for hint in task.hints %}
+                            <li>• {{ hint }}</li>
+                            {% endfor %}
+                        </ul>
+                    </details>
+                    {% endif %}
+
+                    <div class="mb-4">
+                        <label class="block text-sm text-gray-400 mb-2">Ваш код:</label>
+                        <textarea id="code-{{ task.id }}"
+                            class="w-full h-48 bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm"
+                            placeholder="# Напишите ваш код здесь...">{{ task.starter_code or '' }}</textarea>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button onclick="runCode({{ task.id }})" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg">
+                            ▶ Запустить
+                        </button>
+                        <button onclick="submitTask({{ task.id }})" class="bg-green-600 hover:bg-green-700 px-6 py-2 rounded-lg">
+                            ✓ Проверить
+                        </button>
+                    </div>
+
+                    <div id="output-{{ task.id }}" class="mt-4 hidden">
+                        <div class="bg-gray-900 rounded-lg p-4">
+                            <div class="text-sm text-gray-400 mb-2">Вывод:</div>
+                            <pre id="output-content-{{ task.id }}" class="text-gray-100"></pre>
+                        </div>
+                    </div>
+
+                    <div id="result-{{ task.id }}" class="mt-4 hidden"></div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="bg-gray-800 rounded-xl p-6 text-center text-gray-400">
+                К этому уроку пока нет задач
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Interpreter Tab -->
+        <div id="interpreter-tab" class="tab-content hidden">
+            <div class="bg-gray-800 rounded-xl p-6">
+                <h2 class="text-xl font-bold mb-4">Python Интерпретатор</h2>
+                <p class="text-gray-400 mb-4">Напишите код и нажмите "Запустить" для выполнения</p>
+
+                <div class="mb-4">
+                    <textarea id="interpreter-code"
+                        class="w-full h-64 bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm"
+                        placeholder="print('Hello, World!')"></textarea>
+                </div>
+
+                <button onclick="executeCode()" class="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg font-semibold">
+                    ▶ Запустить код
+                </button>
+
+                <div id="interpreter-output" class="mt-4 hidden">
+                    <div class="bg-gray-900 rounded-lg p-4">
+                        <div class="text-sm text-gray-400 mb-2">Результат:</div>
+                        <pre id="interpreter-result" class="text-gray-100 whitespace-pre-wrap"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+            event.target.classList.add('active');
+        }
+
+        async function executeCode() {
+            const code = document.getElementById('interpreter-code').value;
+            const outputDiv = document.getElementById('interpreter-output');
+            const resultPre = document.getElementById('interpreter-result');
+
+            try {
+                const response = await fetch('/api/interpreter/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code })
+                });
+                const data = await response.json();
+
+                outputDiv.classList.remove('hidden');
+                if (data.success) {
+                    resultPre.textContent = data.output || '(нет вывода)';
+                } else {
+                    resultPre.textContent = 'Ошибка: ' + data.error;
+                    resultPre.classList.add('text-red-400');
+                }
+            } catch (error) {
+                outputDiv.classList.remove('hidden');
+                resultPre.textContent = 'Ошибка: ' + error.message;
+            }
+        }
+
+        async function runCode(taskId) {
+            const code = document.getElementById('code-' + taskId).value;
+            const outputDiv = document.getElementById('output-' + taskId);
+            const contentPre = document.getElementById('output-content-' + taskId);
+
+            try {
+                const response = await fetch('/api/tasks/' + taskId + '/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code })
+                });
+                const data = await response.json();
+
+                outputDiv.classList.remove('hidden');
+                if (data.success) {
+                    contentPre.textContent = data.output || '(нет вывода)';
+                } else {
+                    contentPre.textContent = 'Ошибка: ' + data.error;
+                }
+            } catch (error) {
+                outputDiv.classList.remove('hidden');
+                contentPre.textContent = 'Ошибка: ' + error.message;
+            }
+        }
+
+        async function submitTask(taskId) {
+            const code = document.getElementById('code-' + taskId).value;
+            const resultDiv = document.getElementById('result-' + taskId);
+
+            try {
+                const response = await fetch('/api/tasks/' + taskId + '/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code })
+                });
+                const data = await response.json();
+
+                resultDiv.classList.remove('hidden');
+                if (data.result === 'PASS') {
+                    resultDiv.innerHTML = '<div class="bg-green-900/50 border border-green-600 text-green-400 p-4 rounded-lg">✓ Задача решена! +' + data.xp_earned + ' XP</div>';
+                } else if (data.result === 'FAIL') {
+                    resultDiv.innerHTML = '<div class="bg-red-900/50 border border-red-600 text-red-400 p-4 rounded-lg">✗ Неверно. ' + (data.error_message || '') + '</div>';
+                } else {
+                    resultDiv.innerHTML = '<div class="bg-red-900/50 border border-red-600 text-red-400 p-4 rounded-lg">✗ Ошибка: ' + data.error_message + '</div>';
+                }
+            } catch (error) {
+                resultDiv.classList.remove('hidden');
+                resultDiv.innerHTML = '<div class="bg-red-900/50 border border-red-600 text-red-400 p-4 rounded-lg">Ошибка: ' + error.message + '</div>';
+            }
+        }
+
+        async function submitQuiz(quizId) {
+            const container = document.getElementById('quiz-' + quizId);
+            const questions = container.querySelectorAll('.question-item');
+            const answers = [];
+
+            questions.forEach((q, i) => {
+                const selected = q.querySelector('input[type="radio"]:checked');
+                answers.push(selected ? parseInt(selected.value) : -1);
+            });
+
+            try {
+                const response = await fetch('/api/quiz/' + quizId + '/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ answers })
+                });
+                const data = await response.json();
+
+                const resultDiv = document.getElementById('quiz-result-' + quizId);
+                resultDiv.classList.remove('hidden');
+
+                if (data.is_passed) {
+                    resultDiv.innerHTML = '<div class="bg-green-900/50 border border-green-600 text-green-400 p-4 rounded-lg">✓ ' + data.score.toFixed(0) + '% правильных! +' + data.xp_earned + ' XP</div>';
+                } else {
+                    resultDiv.innerHTML = '<div class="bg-red-900/50 border border-red-600 text-red-400 p-4 rounded-lg">✗ ' + data.score.toFixed(0) + '% правильных (нужно ' + 70 + '%)</div>';
+                }
+            } catch (error) {
+                alert('Ошибка: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
