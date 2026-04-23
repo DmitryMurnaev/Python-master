@@ -102,18 +102,17 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 # Настраиваем Jinja2 шаблонизатор
-from jinja2 import Environment, FileSystemLoader
-
-jinja_env = Environment(loader=FileSystemLoader(TEMPLATES_DIR), auto_reload=True)
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 # Добавляем фильтр для Jinja для красивого форматирования
 def format_xp(xp: int) -> str:
     """Форматирует XP с разделением тысяч."""
     return f"{xp:,}".replace(",", " ")
 
-jinja_env.filters["format_xp"] = format_xp
 
-templates = Jinja2Templates(env=jinja_env)
+templates.env.filters["format_xp"] = format_xp
+# Отключаем кэширование шаблонов
+templates.env.cache = None
 
 
 # Подключаем API роутеры
@@ -388,21 +387,21 @@ async def blocks_page(request: Request):
 @app.exception_handler(404)
 async def not_found(request: Request, exc):
     """Страница 404."""
-    return templates.TemplateResponse("error.html", {
-        "request": request,
-        "error_code": 404,
-        "error_message": "Страница не найдена",
-    }, status_code=404)
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(
+        status_code=404,
+        content="<html><body><h1>404 - Страница не найдена</h1><a href='/'>На главную</a></body></html>"
+    )
 
 
 @app.exception_handler(500)
 async def server_error(request: Request, exc):
     """Страница 500."""
-    return templates.TemplateResponse("error.html", {
-        "request": request,
-        "error_code": 500,
-        "error_message": "Внутренняя ошибка сервера",
-    }, status_code=500)
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(
+        status_code=500,
+        content="<html><body><h1>500 - Внутренняя ошибка сервера</h1><a href='/'>На главную</a></body></html>"
+    )
 
 
 # Запуск приложения
