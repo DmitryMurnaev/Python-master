@@ -113,7 +113,7 @@ def format_xp(xp: int) -> str:
 
 jinja_env.filters["format_xp"] = format_xp
 
-templates = Jinja2Templates(env=jinja_env, directory=TEMPLATES_DIR)
+templates = Jinja2Templates(env=jinja_env)
 
 
 # Подключаем API роутеры
