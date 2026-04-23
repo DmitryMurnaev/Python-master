@@ -374,11 +374,12 @@ async def seed_initial_data(db: AsyncSessionLocal):
                 xp_reward=30,
             )
             db.add(lesson)
+            await db.flush()  # Получаем ID урока до создания связанных записей
 
             # Создаём квизы
             for quiz_data in lesson_data.get("quizzes", []):
                 quiz = Quiz(
-                    lesson_id=lesson.id if lesson.id else 0,
+                    lesson_id=lesson.id,
                     title=quiz_data["title"],
                     questions=json.dumps(quiz_data["questions"]),
                     passing_score=70.0,
@@ -388,7 +389,7 @@ async def seed_initial_data(db: AsyncSessionLocal):
             # Создаём задачи
             for task_idx, task_data in enumerate(lesson_data.get("tasks", [])):
                 task = Task(
-                    lesson_id=lesson.id if lesson.id else 0,
+                    lesson_id=lesson.id,
                     order_index=task_idx + 1,
                     title=task_data["title"],
                     description=task_data["description"],
