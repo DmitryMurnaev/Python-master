@@ -20,7 +20,7 @@ from sqlalchemy import select, func
 import os
 
 from app.core.config import settings
-from app.templating import templates
+from app.templating import render
 from app.db.session import init_db, AsyncSessionLocal
 from app.models import User, Block, Lesson, UserProgress, Task, Quiz, QuizResult, TaskSubmission, Achievement, UserAchievement
 from app.api import (
@@ -142,7 +142,7 @@ async def root(request: Request):
                         "level": user.level,
                     }
 
-    return templates.TemplateResponse("index.html", {
+    return render("index.html", {
         "request": request,
         "user": user_data,
     })
@@ -303,7 +303,7 @@ async def dashboard(request: Request):
 
         next_goal = f"До следующего уровня: {xp_to_next} XP"
 
-        return templates.TemplateResponse("dashboard.html", {
+        return render("dashboard.html", {
             "request": request,
             "user": user,
             "stats": stats,
@@ -363,7 +363,7 @@ async def blocks_page(request: Request):
                 'progress_percent': int((completed / len(lessons) * 100)) if lessons else 0,
             })
 
-    return templates.TemplateResponse("blocks/blocks.html", {
+    return render("blocks/blocks.html", {
         "request": request,
         "blocks": blocks_data,
         "user": user,

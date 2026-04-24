@@ -18,7 +18,7 @@ from app.core.security import get_current_user, get_current_user_optional
 from app.services.gamification import (
     calculate_level, xp_for_next_level, LEVELS, check_achievements
 )
-from app.templating import templates
+from app.templating import render
 
 router = APIRouter(prefix="/api/progress", tags=["progress"])
 
@@ -279,7 +279,7 @@ async def dashboard_page(
     xp_to_next = stats['xp_to_next_level']
     next_goal = f"До следующего уровня: {xp_to_next} XP"
 
-    return templates.TemplateResponse("dashboard.html", {
+    return render("dashboard.html", {
         "request": request,
         "user": current_user,
         "stats": stats,

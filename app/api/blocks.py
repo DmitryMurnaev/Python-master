@@ -24,7 +24,7 @@ from app.schemas.learning import (
     BlockResponse, BlockDetail, LessonResponse, LessonDetail,
     TaskResponse, QuizResponse
 )
-from app.templating import templates
+from app.templating import render
 
 router = APIRouter(prefix="/api/blocks", tags=["blocks"])
 
@@ -227,7 +227,7 @@ async def get_block_page(
 ):
     """Возвращает HTML страницу блока."""
     block_detail = await get_block_detail(block_id, db, current_user)
-    return templates.TemplateResponse("blocks/block_detail.html", {
+    return render("blocks/block_detail.html", {
         "request": request,
         "block": block_detail,
         "user": current_user,
@@ -309,7 +309,7 @@ async def get_lesson_page(
         for t in lesson.tasks
     ]
 
-    return templates.TemplateResponse("lessons/lesson_page.html", {
+    return render("lessons/lesson_page.html", {
         "request": request,
         "lesson": lesson,
         "quizzes": quizzes_data,

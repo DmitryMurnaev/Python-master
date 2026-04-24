@@ -35,7 +35,7 @@ from app.core.security import (
 from app.core.config import settings
 from app.schemas.user import UserCreate, UserLogin, UserResponse, UserProfile, Token
 from app.services.gamification import update_streak
-from app.templating import templates
+from app.templating import render
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -43,7 +43,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @router.get("/register")
 async def register_page(request):
     """Страница регистрации."""
-    return templates.TemplateResponse("auth/register.html", {"request": request})
+    return render("auth/register.html", {"request": request})
 
 
 @router.post("/register")
@@ -109,7 +109,7 @@ async def register(
 @router.get("/login")
 async def login_page(request):
     """Страница входа."""
-    return templates.TemplateResponse("auth/login.html", {"request": request})
+    return render("auth/login.html", {"request": request})
 
 
 @router.post("/login")
