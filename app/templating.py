@@ -29,8 +29,8 @@ else:
 # Создаём единый экземпляр шаблонизатора
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
-# Кэш
-templates.env.cache = {}
+# Отключаем кэширование
+templates.env.cache = None
 
 
 def format_xp(xp: int) -> str:
