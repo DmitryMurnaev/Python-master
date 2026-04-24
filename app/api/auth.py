@@ -37,7 +37,7 @@ from app.schemas.user import UserCreate, UserLogin, UserResponse, UserProfile, T
 from app.services.gamification import update_streak
 from app.templating import templates
 
-router = APIRouter(prefix="/api/auth", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.get("/register")

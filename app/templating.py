@@ -36,7 +36,9 @@ class Jinja2Templates:
     def TemplateResponse(self, name: str, context: dict):
         """Рендерит шаблон и возвращает HTMLResponse."""
         from fastapi.responses import HTMLResponse
+        print(f"DEBUG TemplateResponse: name={name}, context_keys={list(context.keys())}")
         template = self.env.get_template(name)
+        print(f"DEBUG TemplateResponse: template loaded OK")
         return HTMLResponse(template.render(**context))
 
 

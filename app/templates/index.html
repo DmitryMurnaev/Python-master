@@ -48,10 +48,10 @@
                         <span class="text-gray-400">|</span>
                         <span class="text-green-400">XP: {{ user.xp }}</span>
                         <span class="text-yellow-400">Ур. {{ user.level }}</span>
-                        <a href="/api/auth/logout" class="text-gray-400 hover:text-white">Выход</a>
+                        <a href="/auth/logout" class="text-gray-400 hover:text-white">Выход</a>
                     {% else %}
-                        <a href="/api/auth/login" class="text-gray-400 hover:text-white">Вход</a>
-                        <a href="/api/auth/register" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition">Регистрация</a>
+                        <a href="/auth/login" class="text-gray-400 hover:text-white">Вход</a>
+                        <a href="/auth/register" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition">Регистрация</a>
                     {% endif %}
                 </div>
             </div>
@@ -72,7 +72,7 @@
 
             <div class="flex flex-col sm:flex-row justify-center gap-4">
                 {% if not user %}
-                    <a href="/api/auth/register" class="bg-green-600 hover:bg-green-700 px-8 py-4 rounded-xl text-lg font-semibold transition transform hover:scale-105">
+                    <a href="/auth/register" class="bg-green-600 hover:bg-green-700 px-8 py-4 rounded-xl text-lg font-semibold transition transform hover:scale-105">
                         Начать обучение бесплатно
                     </a>
                 {% else %}
