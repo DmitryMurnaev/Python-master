@@ -7,47 +7,30 @@ app/templating.py
 """
 
 import os
-import jinja2
+from fastapi.templating import Jinja2Templates
 
 # Вычисляем абсолютный путь к директории templates
-# os.path.abspath(__file__) = C:\...\Python-master\app\templating.py
-# dirname = C:\...\Python-master\app
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 
-# Создаём FileSystemLoader
-file_loader = jinja2.FileSystemLoader(TEMPLATES_DIR)
+# DEBUG: проверяем что директория существует
+import os
+if not os.path.exists(TEMPLATES_DIR):
+    print(f"WARNING: Templates directory not found: {TEMPLATES_DIR}")
+    # Пробуем альтернативный путь
+    ALT_DIR = os.path.join(os.path.dirname(BASE_DIR), "templates")
+    if os.path.exists(ALT_DIR):
+        TEMPLATES_DIR = ALT_DIR
+        print(f"Using alternative templates dir: {TEMPLATES_DIR}")
+else:
+    print(f"Templates directory found: {TEMPLATES_DIR}")
+    print(f"Templates contents: {os.listdir(TEMPLATES_DIR)}")
 
-# Создаём Environment с отключённым кэшированием
-env = jinja2.Environment(
-    loader=file_loader,
-    autoescape=True,
-    cache_size=0,  # Отключаем кэш
-)
-
-# Функция для рендеринга шаблона
-def render_template(template_name: str, context: dict):
-    """Рендерит шаблон и возвращает HTML строку."""
-    template = env.get_template(template_name)
-    return template.render(**context)
-
-
-# Класс совместимый с FastAPI TemplateResponse
-class Jinja2Templates:
-    """Обёртка для совместимости с FastAPI."""
-
-    def __init__(self, directory: str = None):
-        self.directory = directory
-        self.env = env
-
-    def TemplateResponse(self, name: str, context: dict):
-        """Возвращает HTMLResponse с отрендеренным шаблоном."""
-        from fastapi.responses import HTMLResponse
-        template = self.env.get_template(name)
-        return HTMLResponse(template.render(**context))
-
-
+# Создаём единый экземпляр шаблонизатора
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
+
+# Кэш
+templates.env.cache = {}
 
 
 def format_xp(xp: int) -> str:
