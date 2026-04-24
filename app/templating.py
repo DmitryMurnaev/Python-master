@@ -33,12 +33,13 @@ class Jinja2Templates:
         self.env = env
         self.directory = directory
 
-    def TemplateResponse(self, name: str, context: dict):
+    def TemplateResponse(self, request, name: str, context: dict = None):
         """Рендерит шаблон и возвращает HTMLResponse."""
         from fastapi.responses import HTMLResponse
-        print(f"DEBUG TemplateResponse: name={name}, context_keys={list(context.keys())}")
+        if context is None:
+            context = {}
+        context["request"] = request
         template = self.env.get_template(name)
-        print(f"DEBUG TemplateResponse: template loaded OK")
         return HTMLResponse(template.render(**context))
 
 
