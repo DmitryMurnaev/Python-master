@@ -18,7 +18,7 @@ app/api/auth.py
 """
 
 from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, status, Form
+from fastapi import APIRouter, Depends, HTTPException, status, Form, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -41,7 +41,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.get("/register")
-async def register_page(request):
+async def register_page(request: Request):
     """Страница регистрации."""
     return render("auth/register.html", {"request": request})
 
