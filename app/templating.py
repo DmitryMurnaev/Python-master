@@ -18,6 +18,9 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 # Создаём единый экземпляр шаблонизатора
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
+# Отключаем кэширование шаблонов
+templates.env.cache = None
+
 
 def format_xp(xp: int) -> str:
     """Форматирует XP с разделением тысяч."""
