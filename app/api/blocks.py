@@ -11,7 +11,6 @@ app/api/blocks.py
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
@@ -25,9 +24,9 @@ from app.schemas.learning import (
     BlockResponse, BlockDetail, LessonResponse, LessonDetail,
     TaskResponse, QuizResponse
 )
+from app.templating import templates
 
 router = APIRouter(prefix="/api/blocks", tags=["blocks"])
-templates = Jinja2Templates(directory="app/templates")
 
 
 @router.get("/")

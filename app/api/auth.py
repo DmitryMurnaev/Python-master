@@ -20,7 +20,6 @@ app/api/auth.py
 from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status, Form
 from fastapi.responses import RedirectResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -36,9 +35,9 @@ from app.core.security import (
 from app.core.config import settings
 from app.schemas.user import UserCreate, UserLogin, UserResponse, UserProfile, Token
 from app.services.gamification import update_streak
+from app.templating import templates
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
-templates = Jinja2Templates(directory="app/templates")
 
 
 @router.get("/register")

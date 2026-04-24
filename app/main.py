@@ -15,12 +15,12 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse
-from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select, func
 import os
 
 from app.core.config import settings
+from app.templating import templates
 from app.db.session import init_db, AsyncSessionLocal
 from app.models import User, Block, Lesson, UserProgress, Task, Quiz, QuizResult, TaskSubmission, Achievement, UserAchievement
 from app.api import (
@@ -100,19 +100,6 @@ app.add_middleware(
 
 # Подключаем статику
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-
-# Настраиваем Jinja2 шаблонизатор
-templates = Jinja2Templates(directory=TEMPLATES_DIR)
-
-# Добавляем фильтр для Jinja для красивого форматирования
-def format_xp(xp: int) -> str:
-    """Форматирует XP с разделением тысяч."""
-    return f"{xp:,}".replace(",", " ")
-
-
-templates.env.filters["format_xp"] = format_xp
-# Отключаем кэширование шаблонов
-templates.env.cache = None
 
 
 # Подключаем API роутеры

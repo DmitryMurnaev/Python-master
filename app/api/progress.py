@@ -7,7 +7,6 @@ app/api/progress.py
 from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
@@ -19,9 +18,9 @@ from app.core.security import get_current_user, get_current_user_optional
 from app.services.gamification import (
     calculate_level, xp_for_next_level, LEVELS, check_achievements
 )
+from app.templating import templates
 
 router = APIRouter(prefix="/api/progress", tags=["progress"])
-templates = Jinja2Templates(directory="app/templates")
 
 
 @router.get("/stats")
