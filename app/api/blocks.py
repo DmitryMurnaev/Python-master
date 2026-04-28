@@ -97,6 +97,7 @@ async def get_blocks(
 @router.get("/{block_id}")
 async def get_block_detail(
     block_id: int,
+    request,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user_optional)
 ):
