@@ -188,18 +188,19 @@ async def get_current_user(
 
 
 async def get_current_user_optional(
-        request: Request,
+        request: Request = None,
         db: AsyncSession = Depends(get_db)
 ) -> Optional[User]:
     """
     Опциональная версия — возвращает None, если не удалось аутентифицировать.
     """
     token = None
-    auth_header = request.headers.get("Authorization")
-    if auth_header and auth_header.startswith("Bearer "):
-        token = auth_header.split(" ")[1]
-    else:
-        token = request.cookies.get("access_token")
+    if request:
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.split(" ")[1]
+        else:
+            token = request.cookies.get("access_token")
 
     if not token:
         return None
