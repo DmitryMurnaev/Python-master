@@ -107,7 +107,7 @@ async def register(
 
 
 @router.get("/login")
-async def login_page(request):
+async def login_page(request: Request):
     """Страница входа."""
     return render("auth/login.html", {"request": request})
 
