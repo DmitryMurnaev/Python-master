@@ -32,7 +32,7 @@ router = APIRouter(prefix="/api/blocks", tags=["blocks"])
 @router.get("/")
 async def get_blocks(
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user_optional)
+    current_user: User = Depends(get_current_user_optional),
 ):
     """
     Получить список всех блоков с прогрессом пользователя.

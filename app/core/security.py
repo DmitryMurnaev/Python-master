@@ -25,7 +25,7 @@ from typing import Optional
 
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 
 from app.core.config import settings
@@ -188,7 +188,8 @@ async def get_current_user(
 
 async def get_current_user_optional(
     token: Optional[str] = Depends(oauth2_scheme),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    request: Request = None
 ) -> Optional[User]:
     """
     Опциональная версия get_current_user - не выбрасывает исключение,
@@ -196,6 +197,11 @@ async def get_current_user_optional(
 
     Используется для страниц, где гости тоже могут просматривать контент.
     """
+    # OAuth2Bearer already extracts from Authorization header, but we also need to check cookie
+    # If token from header is empty/not valid, try cookie
+    if not token and request:
+        token = request.cookies.get("access_token")
+
     if not token:
         return None
 
