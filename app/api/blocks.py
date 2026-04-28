@@ -9,7 +9,7 @@ app/api/blocks.py
 3. Страница урока с теорией
 """
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
@@ -227,7 +227,7 @@ async def get_block_page(
     current_user: User = Depends(get_current_user_optional)
 ):
     """Возвращает HTML страницу блока."""
-    block_detail = await get_block_detail(block_id, db, current_user)
+    block_detail = await get_block_detail(block_id, request, db, current_user)
     return render("blocks/block_detail.html", {
         "request": request,
         "block": block_detail,
