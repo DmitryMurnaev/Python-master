@@ -140,72 +140,79 @@ def decode_access_token(token: str) -> Optional[str]:
 
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    db: AsyncSession = Depends(get_db)
+        request: Request,
+        db: AsyncSession = Depends(get_db)
 ) -> User:
     """
-    Зависимость FastAPI для получения текущего пользователя из токена.
-
-    Используется какDepends() в эндпоинтах, требующих аутентификации.
-
-    Args:
-        token: JWT токен из заголовка Authorization
-        db: Сессия базы данных
-
-    Returns:
-        Объект User
-
-    Raises:
-        HTTPException: Если токен невалидный или пользователь не найден
+    Зависимость для получения текущего пользователя.
+    Сначала ищет токен в заголовке Authorization: Bearer <token>,
+    затем в cookie 'access_token'.
     """
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Не удалось подтвердить credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+    token = None
 
-    # Декодируем токен
+    # Пытаемся взять из заголовка
+    auth_header = request.headers.get("Authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        token = auth_header.split(" ")[1]
+    else:
+        # Иначе из cookie
+        token = request.cookies.get("access_token")
+
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Не найден токен доступа",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
     user_id = decode_access_token(token)
-
     if user_id is None:
-        raise credentials_exception
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Неверный или просроченный токен",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
-    # Ищем пользователя в базе
-    # user_id пришёл как строка из JWT, приводим к int
     try:
         user_id_int = int(user_id)
     except ValueError:
-        raise credentials_exception
+        raise HTTPException(status_code=401, detail="Некорректный ID пользователя")
 
     result = await db.execute(select(User).where(User.id == user_id_int))
     user = result.scalar_one_or_none()
 
-    if user is None:
-        raise credentials_exception
+    if not user:
+        raise HTTPException(status_code=401, detail="Пользователь не найден")
 
     return user
 
 
 async def get_current_user_optional(
-    token: Optional[str] = Depends(oauth2_scheme),
-    db: AsyncSession = Depends(get_db),
-    request: Request = None
+        request: Request,
+        db: AsyncSession = Depends(get_db)
 ) -> Optional[User]:
     """
-    Опциональная версия get_current_user - не выбрасывает исключение,
-    а возвращает None если пользователь не аутентифицирован.
-
-    Используется для страниц, где гости тоже могут просматривать контент.
+    Опциональная версия — возвращает None, если не удалось аутентифицировать.
     """
-    # OAuth2Bearer already extracts from Authorization header, but we also need to check cookie
-    # If token from header is empty/not valid, try cookie
-    if not token and request:
+    token = None
+    auth_header = request.headers.get("Authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        token = auth_header.split(" ")[1]
+    else:
         token = request.cookies.get("access_token")
 
     if not token:
         return None
 
-    try:
-        return await get_current_user(token, db)
-    except HTTPException:
+    user_id = decode_access_token(token)
+    if user_id is None:
         return None
+
+    try:
+        user_id_int = int(user_id)
+    except ValueError:
+        return None
+
+    result = await db.execute(select(User).where(User.id == user_id_int))
+    user = result.scalar_one_or_none()
+    return user
