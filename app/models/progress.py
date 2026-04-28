@@ -36,7 +36,7 @@ class UserProgress(Base):
     is_completed: Mapped[bool] = mapped_column(Boolean, default=False)
     time_spent_seconds: Mapped[int] = mapped_column(Integer, default=0)
     last_accessed: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(timezone.utc)
+        DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None)
     )
     completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
@@ -65,7 +65,7 @@ class QuizResult(Base):
     total_questions: Mapped[int] = mapped_column(Integer, nullable=False)
     is_passed: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(timezone.utc)
+        DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None)
     )
 
     # Связи
@@ -99,7 +99,7 @@ class TaskSubmission(Base):
     tests_total: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     execution_time_ms: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(timezone.utc)
+        DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None)
     )
 
     # Связи
@@ -149,7 +149,7 @@ class UserAchievement(Base):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
     achievement_id: Mapped[int] = mapped_column(Integer, ForeignKey("achievements.id"), nullable=False)
     earned_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(timezone.utc)
+        DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None)
     )
 
     # Связи

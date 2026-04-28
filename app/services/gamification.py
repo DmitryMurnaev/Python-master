@@ -150,7 +150,7 @@ async def update_streak(db: AsyncSession, user: User) -> User:
         # Первый день
         user.streak_days = 1
 
-    user.last_activity_date = datetime.now(timezone.utc)
+    user.last_activity_date = datetime.now(timezone.utc).replace(tzinfo=None)
     await db.commit()
     await db.refresh(user)
 
@@ -331,7 +331,7 @@ async def check_achievements(db: AsyncSession, user: User) -> list[Achievement]:
             user_achievement = UserAchievement(
                 user_id=user.id,
                 achievement_id=achievement.id,
-                earned_at=datetime.now(timezone.utc)
+                earned_at=datetime.now(timezone.utc).replace(tzinfo=None)
             )
             db.add(user_achievement)
             new_achievements.append(achievement)

@@ -53,7 +53,7 @@ async def get_flashcards(
             'ease_factor': card.ease_factor,
             'repetitions': card.repetitions,
             'next_review_date': card.next_review_date,
-            'is_due': card.next_review_date <= datetime.now(timezone.utc),
+            'is_due': card.next_review_date <= datetime.now(timezone.utc).replace(tzinfo=None),
         }
         for card in cards
     ]
@@ -76,7 +76,7 @@ async def create_flashcard(
         question=card.question,
         answer=card.answer,
         block_id=card.block_id,
-        next_review_date=datetime.now(timezone.utc),  # Показываем сразу
+        next_review_date=datetime.now(timezone.utc).replace(tzinfo=None),  # Показываем сразу
     )
     db.add(flashcard)
     await db.commit()
@@ -168,7 +168,7 @@ async def get_study_session(
         limit: Максимальное количество карточек
         block_id: Фильтр по блоку
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
 
     query = select(FlashCard).where(
         FlashCard.user_id == current_user.id,
@@ -245,7 +245,7 @@ async def get_flashcard_stats(
     """
     Получить статистику карточек.
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
 
     # Всего карточек
     result = await db.execute(
@@ -323,7 +323,7 @@ async def get_daily_challenge(
             challenge = DailyChallenge(
                 user_id=current_user.id,
                 task_id=task.id,
-                date=datetime.now(timezone.utc),
+                date=datetime.now(timezone.utc).replace(tzinfo=None),
             )
             db.add(challenge)
             await db.commit()

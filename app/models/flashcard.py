@@ -49,12 +49,12 @@ class FlashCard(Base):
     ease_factor: Mapped[float] = mapped_column(Float, default=2.5)
     repetitions: Mapped[int] = mapped_column(Integer, default=0)
     next_review_date: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(timezone.utc)
+        DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None)
     )
 
     # Метаданные
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(timezone.utc)
+        DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None)
     )
     last_reviewed: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
@@ -100,8 +100,8 @@ class FlashCard(Base):
         )
 
         # Устанавливаем дату следующего повтора
-        self.next_review_date = datetime.now(timezone.utc) + timedelta(days=self.interval)
-        self.last_reviewed = datetime.now(timezone.utc)
+        self.next_review_date = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=self.interval)
+        self.last_reviewed = datetime.now(timezone.utc).replace(tzinfo=None)
 
     def __repr__(self) -> str:
         return f"<FlashCard(id={self.id}, question={self.question[:30]}...)>"
@@ -123,7 +123,7 @@ class DailyChallenge(Base):
     is_completed: Mapped[bool] = mapped_column(Boolean, default=False)
     is_rewarded: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=lambda: datetime.now(timezone.utc)
+        DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None)
     )
 
     # Связи

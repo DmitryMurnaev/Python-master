@@ -357,7 +357,7 @@ async def mark_lesson_complete(
         db.add(progress)
 
     progress.is_completed = True
-    progress.completed_at = datetime.now(timezone.utc)
+    progress.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
     await db.commit()
 

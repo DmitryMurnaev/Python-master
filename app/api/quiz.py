@@ -119,7 +119,7 @@ async def submit_quiz(
     if is_passed and not progress.is_completed:
         from datetime import datetime, timezone
         progress.is_completed = True
-        progress.completed_at = datetime.now(timezone.utc)
+        progress.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
     await db.commit()
 

@@ -353,7 +353,7 @@ async def _update_lesson_progress(
 
     if all_solved and not progress.is_completed:
         progress.is_completed = True
-        progress.completed_at = datetime.now(timezone.utc)
+        progress.completed_at = datetime.now(timezone.utc).replace(tzinfo=None)
 
         # Добавляем XP за завершение урока
         await update_user_xp(db, user, XP_REWARDS['lesson_completed'], "Завершение урока")
