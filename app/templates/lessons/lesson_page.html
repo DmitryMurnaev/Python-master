@@ -76,10 +76,10 @@
                         {% for q in quiz.questions %}
                         <div class="mb-6 question-item" data-question="{{ loop.index0 }}">
                             <p class="font-medium mb-3">{{ loop.index }}. {{ q.question }}</p>
-                            <div class="space-y-2">
+                            <div class="space-y-2" data-quiz-index="{{ loop.index0 }}">
                                 {% for option in q.options %}
                                 <label class="flex items-center p-3 bg-gray-700 rounded-lg cursor-pointer hover:bg-gray-600">
-                                    <input type="radio" name="q{{ loop.parent.loop.index0 }}" value="{{ loop.index0 }}" class="mr-3">
+                                    <input type="radio" name="q{{ loop.index0 }}" value="{{ loop.index0 }}" class="mr-3">
                                     <span>{{ option }}</span>
                                 </label>
                                 {% endfor %}
