@@ -14,6 +14,18 @@ class InterpreterRequest(BaseModel):
     task_id: Optional[int] = None  # Если выполняется в контексте задачи
 
 
+class InterpreterTestRequest(BaseModel):
+    """Запрос на выполнение тестов."""
+    code: str = Field(..., min_length=1, max_length=50000)
+    test_code: str = Field(..., min_length=1, max_length=50000)
+
+
+class InterpreterCheckOutputRequest(BaseModel):
+    """Запрос на проверку вывода."""
+    code: str = Field(..., min_length=1, max_length=50000)
+    expected_output: str = Field(..., max_length=50000)
+
+
 class InterpreterResponse(BaseModel):
     """Результат выполнения кода."""
     success: bool

@@ -9,6 +9,7 @@ app/api/blocks.py
 3. Страница урока с теорией
 """
 
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -97,9 +98,8 @@ async def get_blocks(
 @router.get("/{block_id}")
 async def get_block_detail(
     block_id: int,
-    request,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user_optional)
+    current_user: Optional[User] = Depends(get_current_user_optional)
 ):
     """
     Получить детали блока с уроками.
@@ -222,12 +222,120 @@ async def get_block_detail(
 @router.get("/{block_id}/html")
 async def get_block_page(
     block_id: int,
-    request,
+    request: Request,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user_optional)
 ):
     """Возвращает HTML страницу блока."""
-    block_detail = await get_block_detail(block_id, request, db, current_user)
+    # Получаем блок
+    result = await db.execute(select(Block).where(Block.id == block_id))
+    block = result.scalar_one_or_none()
+
+    if not block:
+        raise HTTPException(status_code=404, detail="Блок не найден")
+
+    # Проверяем уровень доступа
+    if current_user and current_user.level < block.min_level:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Для доступа к этому блоку нужен уровень {block.min_level}"
+        )
+
+    # Получаем уроки блока
+    result = await db.execute(
+        select(Lesson)
+        .where(Lesson.block_id == block_id)
+        .options(
+            selectinload(Lesson.quizzes),
+            selectinload(Lesson.tasks)
+        )
+        .order_by(Lesson.order_index)
+    )
+    lessons = result.scalars().all()
+
+    # Получаем прогресс пользователя
+    user_progress = {}
+    if current_user:
+        result = await db.execute(
+            select(UserProgress).where(UserProgress.user_id == current_user.id)
+        )
+        for progress in result.scalars().all():
+            user_progress[progress.lesson_id] = progress.is_completed
+
+    # Получаем решённые задачи
+    solved_tasks = set()
+    if current_user:
+        result = await db.execute(
+            select(TaskSubmission.task_id)
+            .where(TaskSubmission.user_id == current_user.id)
+            .where(TaskSubmission.result == 'PASS')
+        )
+        solved_tasks = {row[0] for row in result.fetchall()}
+
+    # Формируем данные уроков
+    lessons_data = []
+    prev_completed = True
+
+    for lesson in lessons:
+        is_completed = user_progress.get(lesson.id, False)
+        is_locked = not prev_completed
+
+        lessons_data.append(LessonDetail(
+            id=lesson.id,
+            block_id=lesson.block_id,
+            order_index=lesson.order_index,
+            title=lesson.title,
+            description=lesson.description,
+            content=lesson.content,
+            is_project=lesson.is_project,
+            xp_reward=lesson.xp_reward,
+            is_completed=is_completed,
+            is_locked=is_locked,
+            quizzes_count=len(lesson.quizzes),
+            tasks_count=len(lesson.tasks),
+            quizzes=[
+                QuizResponse(
+                    id=q.id,
+                    lesson_id=q.lesson_id,
+                    title=q.title,
+                    passing_score=q.passing_score,
+                    questions_count=len(eval(q.questions)) if q.questions else 0,
+                )
+                for q in lesson.quizzes
+            ],
+            tasks=[
+                TaskResponse(
+                    id=t.id,
+                    lesson_id=t.lesson_id,
+                    order_index=t.order_index,
+                    title=t.title,
+                    description=t.description,
+                    starter_code=t.starter_code,
+                    hints=t.hints,
+                    xp_reward=t.xp_reward,
+                    is_solved=t.id in solved_tasks,
+                    attempts_count=0,
+                )
+                for t in lesson.tasks
+            ],
+        ))
+
+        prev_completed = is_completed or is_locked
+
+    block_detail = BlockDetail(
+        id=block.id,
+        title=block.title,
+        description=block.description,
+        icon=block.icon,
+        min_level=block.min_level,
+        xp_reward=block.xp_reward,
+        order_index=block.order_index,
+        lessons_count=len(lessons),
+        completed_lessons=sum(1 for l in lessons_data if l.is_completed),
+        progress_percent=int(sum(1 for l in lessons_data if l.is_completed) / len(lessons) * 100) if lessons else 0,
+        lessons=lessons_data,
+    )
+
     return render("blocks/block_detail.html", {
         "request": request,
         "block": block_detail,
@@ -238,7 +346,7 @@ async def get_block_page(
 @router.get("/lesson/{lesson_id}")
 async def get_lesson_page(
     lesson_id: int,
-    request,
+    request: Request,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user_optional)
 ):

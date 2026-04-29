@@ -61,6 +61,8 @@ from app.schemas.interpreter import (
     InterpreterRequest,
     InterpreterResponse,
     InterpreterError,
+    InterpreterTestRequest,
+    InterpreterCheckOutputRequest,
 )
 
 __all__ = [
@@ -114,4 +116,6 @@ __all__ = [
     "InterpreterRequest",
     "InterpreterResponse",
     "InterpreterError",
+    "InterpreterTestRequest",
+    "InterpreterCheckOutputRequest",
 ]

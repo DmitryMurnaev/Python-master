@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.models.user import User
 from app.core.security import get_current_user
-from app.schemas.interpreter import InterpreterRequest, InterpreterResponse
+from app.schemas.interpreter import InterpreterRequest, InterpreterResponse, InterpreterTestRequest, InterpreterCheckOutputRequest
 from app.services.interpreter import interpreter
 
 router = APIRouter(prefix="/api/interpreter", tags=["interpreter"])
@@ -42,21 +42,19 @@ async def execute_code(
 
 @router.post("/test")
 async def run_tests(
-    code: str,
-    test_code: str,
+    request: InterpreterTestRequest,
     current_user: User = Depends(get_current_user)
 ):
     """
     Выполнить тесты для проверки решения.
 
     Args:
-        code: Код решения
-        test_code: Тесты для проверки
+        request: Код решения и тесты
 
     Returns:
         Результаты тестов
     """
-    result = interpreter.run_tests(code, test_code)
+    result = interpreter.run_tests(request.code, request.test_code)
 
     return {
         'success': result['success'],
@@ -70,20 +68,18 @@ async def run_tests(
 
 @router.post("/check-output")
 async def check_output(
-    code: str,
-    expected_output: str,
+    request: InterpreterCheckOutputRequest,
     current_user: User = Depends(get_current_user)
 ):
     """
     Проверить вывод программы.
 
     Args:
-        code: Код решения
-        expected_output: Ожидаемый вывод
+        request: Код решения и ожидаемый вывод
 
     Returns:
         Результат проверки
     """
-    result = interpreter.check_output(code, expected_output)
+    result = interpreter.check_output(request.code, request.expected_output)
 
     return result
