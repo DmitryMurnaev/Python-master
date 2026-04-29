@@ -265,6 +265,8 @@
                 resultDiv.classList.remove('hidden');
                 if (data.result === 'PASS') {
                     resultDiv.innerHTML = '<div class="bg-green-900/50 border border-green-600 text-green-400 p-4 rounded-lg">✓ Задача решена! +' + data.xp_earned + ' XP</div>';
+                    // Update completion status without refresh
+                    await checkLessonCompletion();
                 } else if (data.result === 'FAIL') {
                     resultDiv.innerHTML = '<div class="bg-red-900/50 border border-red-600 text-red-400 p-4 rounded-lg">✗ Неверно. ' + (data.error_message || '') + '</div>';
                 } else {
@@ -273,6 +275,25 @@
             } catch (error) {
                 resultDiv.classList.remove('hidden');
                 resultDiv.innerHTML = '<div class="bg-red-900/50 border border-red-600 text-red-400 p-4 rounded-lg">Ошибка: ' + error.message + '</div>';
+            }
+        }
+
+        async function checkLessonCompletion() {
+            // Fetch current lesson progress and update UI
+            const lessonId = window.location.pathname.split('/').pop();
+            try {
+                const response = await fetch('/api/progress/lesson/' + lessonId);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.is_completed) {
+                        const headerDiv = document.querySelector('.flex.items-center.justify-between.mb-6');
+                        if (headerDiv && !headerDiv.querySelector('.bg-green-600')) {
+                            headerDiv.innerHTML = '<h1 class="text-2xl font-bold">' + document.querySelector('.text-2xl.font-bold').textContent + '</h1><span class="bg-green-600 px-4 py-2 rounded-lg text-sm">✓ Завершён</span>';
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('Could not check lesson completion');
             }
         }
 
@@ -299,6 +320,8 @@
 
                 if (data.is_passed) {
                     resultDiv.innerHTML = '<div class="bg-green-900/50 border border-green-600 text-green-400 p-4 rounded-lg">✓ ' + data.score.toFixed(0) + '% правильных! +' + data.xp_earned + ' XP</div>';
+                    // Update completion status without refresh
+                    await checkLessonCompletion();
                 } else {
                     resultDiv.innerHTML = '<div class="bg-red-900/50 border border-red-600 text-red-400 p-4 rounded-lg">✗ ' + data.score.toFixed(0) + '% правильных (нужно ' + 70 + '%)</div>';
                 }

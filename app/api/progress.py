@@ -255,6 +255,29 @@ async def get_activity_history(
     ]
 
 
+@router.get("/lesson/{lesson_id}")
+async def get_lesson_progress(
+    lesson_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Получить статус прогресса конкретного урока.
+    """
+    result = await db.execute(
+        select(UserProgress)
+        .where(UserProgress.user_id == current_user.id)
+        .where(UserProgress.lesson_id == lesson_id)
+    )
+    progress = result.scalar_one_or_none()
+
+    return {
+        'lesson_id': lesson_id,
+        'is_completed': progress.is_completed if progress else False,
+        'completed_at': progress.completed_at if progress else None,
+    }
+
+
 @router.get("/dashboard/html")
 async def dashboard_page(
     request: Request,

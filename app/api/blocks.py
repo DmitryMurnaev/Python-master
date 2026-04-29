@@ -10,6 +10,7 @@ app/api/blocks.py
 """
 
 from typing import Optional
+import json
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -181,7 +182,7 @@ async def get_block_detail(
                     lesson_id=q.lesson_id,
                     title=q.title,
                     passing_score=q.passing_score,
-                    questions_count=len(eval(q.questions)) if q.questions else 0,
+                    questions_count=len(json.loads(q.questions)) if q.questions else 0,
                 )
                 for q in lesson.quizzes
             ],
@@ -299,7 +300,7 @@ async def get_block_page(
                     lesson_id=q.lesson_id,
                     title=q.title,
                     passing_score=q.passing_score,
-                    questions_count=len(eval(q.questions)) if q.questions else 0,
+                    questions_count=len(json.loads(q.questions)) if q.questions else 0,
                 )
                 for q in lesson.quizzes
             ],
@@ -398,7 +399,7 @@ async def get_lesson_page(
         {
             'id': q.id,
             'title': q.title,
-            'questions': eval(q.questions) if q.questions else [],
+            'questions': json.loads(q.questions) if q.questions else [],
             'passing_score': q.passing_score,
         }
         for q in lesson.quizzes
@@ -410,7 +411,7 @@ async def get_lesson_page(
             'title': t.title,
             'description': t.description,
             'starter_code': t.starter_code or '',
-            'hints': t.hints_list if hasattr(t, 'hints_list') else [],
+            'hints': json.loads(t.hints) if t.hints else [],
             'expected_output': t.expected_output,
             'is_solved': solved_tasks.get(t.id, False),
             'xp_reward': t.xp_reward,

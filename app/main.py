@@ -315,6 +315,36 @@ async def dashboard(request: Request):
         })
 
 
+@app.get("/flashcards", response_class=HTMLResponse)
+async def flashcards_page(request: Request):
+    """Страница управления карточками."""
+    token = request.cookies.get("access_token")
+    if not token:
+        return RedirectResponse(url="/auth/login", status_code=302)
+
+    from app.core.security import decode_access_token
+    user_id = decode_access_token(token)
+    if not user_id:
+        return RedirectResponse(url="/auth/login", status_code=302)
+
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(select(User).where(User.id == int(user_id)))
+        user = result.scalar_one_or_none()
+
+        if not user:
+            return RedirectResponse(url="/auth/login", status_code=302)
+
+        # Получаем блоки для фильтра
+        result = await db.execute(select(Block).order_by(Block.order_index))
+        blocks = result.scalars().all()
+
+        return render("flashcards.html", {
+            "request": request,
+            "user": user,
+            "blocks": blocks,
+        })
+
+
 @app.get("/blocks", response_class=HTMLResponse)
 async def blocks_page(request: Request):
     """Страница со списком блоков."""
